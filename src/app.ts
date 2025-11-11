@@ -13,6 +13,7 @@ import productRoutes from './routes/productRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import orderRoutes from './routes/orderRoutes';
 import cartRoutes from './routes/cartRoutes';
+import authRoutes from './routes/authRoutes';
 
 // Importar conexão com banco
 import { connectDB } from './db';
@@ -59,6 +60,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/auth', authRoutes);
 
 // Middleware para rotas não encontradas
 app.use(notFound);

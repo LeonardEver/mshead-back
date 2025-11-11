@@ -1,14 +1,22 @@
 import express from 'express';
 import {
-  syncCart,
-  getCart
+  getCart,
+  addToCart,
+  removeFromCart,
+  updateCartItem,
+  clearCart,
 } from '../controllers/cartController';
+import { protect } from '../middleware/authMiddleware'; 
 
 const router = express.Router();
 
-// Rotas de carrinho
-router.post('/:userId/sync', syncCart);
-router.get('/:userId', getCart);
+// Todas as rotas de carrinho precisam de autenticação
+router.use(protect);
+
+router.get('/', getCart);
+router.post('/', addToCart);
+router.put('/:itemId', updateCartItem);
+router.delete('/:itemId', removeFromCart);
+router.delete('/clear', clearCart); 
 
 export default router;
-

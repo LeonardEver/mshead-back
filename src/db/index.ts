@@ -20,7 +20,7 @@ const pool = new Pool({
 export const connectDB = async (): Promise<void> => {
   try {
     const client = await pool.connect();
-    console.log('🐘 PostgreSQL conectado:', client.database);
+    console.log('🐘 PostgreSQL conectado:', process.env.DB_NAME || 'mushco_headshop');
     client.release();
   } catch (error) {
     console.error('❌ Erro ao conectar com PostgreSQL:', error);
