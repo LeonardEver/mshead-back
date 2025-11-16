@@ -1,79 +1,60 @@
 import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
 import dotenv from 'dotenv';
+import { connectDB, query } from './db';
+import { errorHandler, notFound } from './middleware/errorHandler';
+import { firebaseProtect } from './middleware/firebaseAuthMiddleware'; // Importa o novo middleware
 
-// Importar middlewares
-import { errorHandler } from './middleware/errorHandler';
-import { notFound } from './middleware/notFound';
-
-// Importar rotas
-import productRoutes from './routes/productRoutes';
+// Importar Rotas
 import categoryRoutes from './routes/categoryRoutes';
-import orderRoutes from './routes/orderRoutes';
+import productRoutes from './routes/productRoutes';
 import cartRoutes from './routes/cartRoutes';
-import authRoutes from './routes/authRoutes';
+import orderRoutes from './routes/orderRoutes';
+// NÃO precisamos mais de authRoutes
 
-// Importar conexão com banco
-import { connectDB } from './db';
-
-// Carregar variáveis de ambiente
 dotenv.config();
-
-const app = express();
-const PORT = parseInt(process.env.PORT || '3001');
-
-// Conectar ao banco de dados
 connectDB();
 
-// Middlewares de segurança
-app.use(helmet());
+const app = express();
+const PORT = process.env.PORT || 3001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// CORS
+// Middlewares
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173'
 }));
+app.use(express.json());
 
-// Logging
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
+// --- Rotas da API ---
 
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Rotas públicas
+app.use('/api/categories', categoryRoutes);
+app.use('/api/products', productRoutes);
 
-// Health check
+// Rotas protegidas (carrinho, pedidos)
+// Note que elas agora usam o firebaseProtect!
+app.use('/api/cart', firebaseProtect, cartRoutes);
+app.use('/api/orders', firebaseProtect, orderRoutes);
+
+// NÃO precisamos mais das rotas /api/auth
+// app.use('/api/auth', authRoutes);
+
+
+// Rota de Health Check
 app.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Mushco Headshop API está funcionando!',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+  res.status(200).json({
+    status: 'UP',
+    env: NODE_ENV,
+    db: 'connected' // Assumindo que connectDB lida com a falha
   });
 });
 
-// Rotas da API
-app.use('/api/products', productRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/auth', authRoutes);
-
-// Middleware para rotas não encontradas
+// Middlewares de Erro
 app.use(notFound);
-
-// Middleware de tratamento de erros
 app.use(errorHandler);
 
-// Iniciar servidor
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
-  console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌍 Ambiente: ${NODE_ENV}`);
   console.log(`📡 Health check: http://localhost:${PORT}/health`);
 });
-
-export default app;
-
