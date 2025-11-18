@@ -3,14 +3,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB, query } from './db';
 import { errorHandler, notFound } from './middleware/errorHandler';
-import { firebaseProtect } from './middleware/firebaseAuthMiddleware'; // Importa o novo middleware
+import { firebaseProtect } from './middleware/firebaseAuthMiddleware'; // Importa o middleware
 
 // Importar Rotas
 import categoryRoutes from './routes/categoryRoutes';
 import productRoutes from './routes/productRoutes';
 import cartRoutes from './routes/cartRoutes';
 import orderRoutes from './routes/orderRoutes';
-// NÃO precisamos mais de authRoutes
+import favoriteRoutes from './routes/favoriteRoutes'; // <-- 1. IMPORTAR NOVAS ROTAS
 
 dotenv.config();
 connectDB();
@@ -21,7 +21,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Middlewares
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173'
+  origin: process.env.CORS_ORIGIN || 'http://localhost:8080' // Corrigido
 }));
 app.use(express.json());
 
@@ -31,14 +31,11 @@ app.use(express.json());
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 
-// Rotas protegidas (carrinho, pedidos)
-// Note que elas agora usam o firebaseProtect!
+// Rotas protegidas (carrinho, pedidos, favoritos)
+// Elas agora usam o firebaseProtect!
 app.use('/api/cart', firebaseProtect, cartRoutes);
 app.use('/api/orders', firebaseProtect, orderRoutes);
-
-// NÃO precisamos mais das rotas /api/auth
-// app.use('/api/auth', authRoutes);
-
+app.use('/api/favorites', firebaseProtect, favoriteRoutes); // <-- 2. ADICIONAR ROTA PROTEGIDA
 
 // Rota de Health Check
 app.get('/health', (req, res) => {
