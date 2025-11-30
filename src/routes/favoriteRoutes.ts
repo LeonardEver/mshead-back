@@ -4,16 +4,18 @@ import {
   addFavorite,
   removeFavorite
 } from '../controllers/favoriteController';
+// Adicione o import
+import { firebaseProtect } from '../middleware/firebaseAuthMiddleware';
 
 const router = express.Router();
 
-// Todas as rotas de favoritos são protegidas e já usam
-// o 'firebaseProtect' aplicado no app.ts
+// Garanta a proteção aqui
+router.use(firebaseProtect);
 
 router.route('/')
-  .get(getFavorites)   // GET /api/favorites
-  .post(addFavorite);  // POST /api/favorites
+  .get(getFavorites)
+  .post(addFavorite);
 
-router.delete('/:productId', removeFavorite); // DELETE /api/favorites/:productId
+router.delete('/:productId', removeFavorite);
 
 export default router;

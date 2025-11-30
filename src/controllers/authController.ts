@@ -5,6 +5,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 import { query } from '../db';
 import bcrypt from 'bcryptjs';
 import { sign, Secret, SignOptions } from 'jsonwebtoken';
+import { AuthenticatedRequest } from '../middleware/firebaseAuthMiddleware';
 
 // Função para gerar um token JWT
 const generateToken = (userId: string) => {
@@ -97,9 +98,10 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     res.status(401).json({ success: false, error: 'Email ou password inválidos.' }); // Password errada
     return;
   }
+  
 
   // 3. Gerar token e responder
-  const token = generateToken(user.id);
+const token = generateToken(user.id);
 
   res.status(200).json({
     success: true,
@@ -110,5 +112,19 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
       role: user.role,
       token: token,
     },
+  });
+});
+
+export const getMe = asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any; // Usando any temporariamente para evitar erro de TS na interface
+
+  if (!authReq.user) {
+    res.status(404).json({ success: false, error: 'Usuário não encontrado.' });
+    return;
+  }
+
+  res.status(200).json({
+    success: true,
+    data: authReq.user,
   });
 });

@@ -6,12 +6,14 @@ import {
   updateCartItem,
   clearCart,
 } from '../controllers/cartController';
-import { protect } from '../middleware/authMiddleware'; 
+// MUDE ISTO: de 'authMiddleware' para 'firebaseAuthMiddleware'
+// e de 'protect' para 'firebaseProtect'
+import { firebaseProtect } from '../middleware/firebaseAuthMiddleware'; 
 
 const router = express.Router();
 
-// Todas as rotas de carrinho precisam de autenticação
-router.use(protect);
+// Aplique o middleware correto do Firebase
+router.use(firebaseProtect);
 
 router.get('/', getCart);
 router.post('/', addToCart);
