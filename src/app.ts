@@ -21,9 +21,10 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Middlewares
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:8080' // Corrigido
+  origin: '*', // Em produção, mude isso para o domínio real. Para dev, '*' resolve.
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
 
 // --- Rotas da API ---
 
