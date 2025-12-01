@@ -26,6 +26,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+app.use(express.json());
+
 // --- Rotas da API ---
 
 // Rotas públicas

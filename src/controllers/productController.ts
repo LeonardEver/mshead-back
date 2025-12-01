@@ -6,18 +6,16 @@ import { query } from '../db';
 
 // GET /api/products - Buscar todos os produtos (com filtros básicos)
 export const getAllProducts = asyncHandler(async (req: Request, res: Response) => {
-  // TODO: Adicionar filtros da query string (categoria, preço, etc.)
-  const sqlQuery = `
-    SELECT * FROM products
-    WHERE in_stock = true -- Ou 'is_active' se você tiver
-    ORDER BY created_at DESC;
-  `;
+  // Note o uso de aspas duplas para selecionar as colunas camelCase agora
+  const text = 'SELECT * FROM products'; 
+  const { rows } = await query(text);
   
-  const { rows } = await query(sqlQuery);
+  // Como renomeamos no banco, o "rows" já virá como { inStock: true, ... }
+  // Não precisa mais de mapper manual.
   
-  res.json({
+  res.status(200).json({
     success: true,
-    data: rows
+    data: rows,
   });
 });
 
